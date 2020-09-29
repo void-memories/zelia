@@ -1,6 +1,7 @@
 import time
 from playsound import playsound
 from threading import Thread
+import getch
 
 
 def metronome():
@@ -12,8 +13,7 @@ def chords():
     queue=['F','Am','C','G']
     while 1:
         for i in queue:
-            playsound(f'chordWavs/90BPM/{i}.wav',False)
-            time.sleep(2.5)
+            playsound(f"chordWavs/90BPM/{getch.getche()}.wav",False)
             #2==120BPM
             #2.5==90BPM
 
