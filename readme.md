@@ -17,5 +17,6 @@ Zelia is a Python + Arduino + Raspberry PI powered machine that help musicians c
   - Machine can also go into the One-shot mode, replicating a piano with 7 keys.
   - BPM of the arrangement can be controlled using a Potentiometer.
 
-
+# Physical Build
+[![Build Status](https://i.ibb.co/S3LMdDZ/IMG-1691.jpg)](https://i.ibb.co/S3LMdDZ/IMG-1691.jpg)
 
