@@ -8,6 +8,11 @@ import random
 
 
 speed = 1
+notesQueue = []
+play=0
+chord_arp=0
+maj_min=1
+loop_1s=1
 
 
 def number_to_note(number):
@@ -15,36 +20,27 @@ def number_to_note(number):
     return notes[number % 12]
 
 
-def update():
-    global speed
-    while 1:
-        speed = float(input('new tempo '))
-
-
 def chords():
     pygame.mixer.init()
 
     global speed
-    queue = ['F', 'Am', 'C', 'G']
+    global notesQueue
+    queue = notesQueue
     while 1:
         index = 0
         for i in queue:
-            color = random_color()
+            if play==0 or chord_arp==1:
+                return
             playsound(f'chordWavs/90BPM/{i}.wav', False)
             time.sleep(speed)
 
             index += 1
 
-            # pygame.mixer.Sound(f'chordWavs/90BPM/{i}.wav').play()
-            # pygame.mixer.music.play()
-
-            # time.sleep(2.5)
-            # 2==120BPM
-            # 2.5==90BPM
-
 
 def notes():
     global speed
+    global notesQueue
+    queue = notesQueue
     pygame.midi.init()
     player = pygame.midi.Output(1)
     player.set_instrument(0)
@@ -62,13 +58,15 @@ def notes():
     conti = 2
 
     while 1:
-        queue = ['Am', 'B', 'C', 'Dm', 'Em', 'F', 'G']
+
         while 1:
             j = random.choice(queue)
             for __ in range(2):
                 for _ in range(conti):
                     index = 0
                     for i in chordsToNotes[j]:
+                        if play==0 or chord_arp==0:
+                            return
                         playsound(f'chordWavs/singleNotes/{i}.wav', False)
                         player.note_on(44, 8+index)
                         time.sleep(speed)
@@ -84,20 +82,19 @@ def notes():
                 time.sleep(speed)
                 player.note_off(44, 10)
 
-                # pygame.mixer.Sound(f'chordWavs/singleNotes/{i}.wav').play()
-                #         time.sleep(speed)
-
-                # pygame.mixer.Sound(f'chordWavs/singleNotes/{chordsToNotes[j][0]}.wav').play()
-                # time.sleep(speed)
-                # pygame.mixer.Sound(f'chordWavs/singleNotes/{chordsToNotes[j][2]}.wav').play()
-                # time.sleep(speed)
-
 
 def readInput():
     global speed
+    global notesQueue
+    global play
+    global chord_arp
     pygame.midi.init()
     input_device = pygame.midi.Input(0)
     while True:
+        
+        
+
+
         if input_device.poll():
             event = input_device.read(1)[0]
             data = event[0]
@@ -105,15 +102,53 @@ def readInput():
             note_number = data[1]
             velocity = data[2]
             print (number_to_note(note_number), velocity, note_number)
-            if note_number == 16:
-                speed = velocity/100
+
+            if note_number == 51:
+                play^=1
+                if play==1:
+                    if chord_arp==0:
+                        Thread(target=chords).start()
+                    else:
+                        Thread(target=notes).start()
+                    
+
+            elif note_number == 52:
+                chord_arp ^= 1
+                if play==1:
+                    if chord_arp==0:
+                        Thread(target=chords).start()
+                    else:
+                        Thread(target=notes).start()
+            elif note_number == 53:
+                maj_min ^= 1
+            elif note_number == 54:
+                loop_1s ^= 1
+            elif note_number == 55:
+                speed = 0.635-(velocity/1000)*5
+                print(speed)
+            elif note_number > 55:
+                selection = note_number-55
+                if selection == 1:
+                    notesQueue.append('C')
+                elif selection == 2:
+                    notesQueue.append('Dm')
+                elif selection == 3:
+                    notesQueue.append('Em')
+                elif selection == 4:
+                    notesQueue.append('F')
+                elif selection == 5:
+                    notesQueue.append('G')
+                elif selection == 6:
+                    notesQueue.append('Am')
+                elif selection == 7:
+                    notesQueue.append('B')
+                elif selection == 8:
+                    try:
+                        fff=notesQueue.pop()
+                    except:
+                        do = 1
 
 
 if __name__ == '__main__':
-    # midi_out = mido.open_output("Launchkey Mini LK Mini InControl")
-    # midi_out.send(mido.Message.from_bytes([0x90, 0x0C, 0x7F]))
-    # midi_out.send(mido.Message('note_on', channel=0, note=8, velocity=1))
 
-    Thread(target=notes).start()
-    # Thread(target=update).start()
     Thread(target=readInput).start()
