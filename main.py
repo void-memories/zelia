@@ -5,7 +5,7 @@ from playsound import playsound
 from threading import Thread
 import mido
 import random
-
+import math
 
 speed = 1
 notesQueue = []
