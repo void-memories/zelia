@@ -6,13 +6,35 @@ from threading import Thread
 import mido
 import random
 import math
+import time
 
 speed = 1
 notesQueue = []
-play=0
-chord_arp=0
-maj_min=1
-loop_1s=1
+play = 0
+chord_arp = 0
+maj_min = 1
+loop_1s = 1
+
+
+#A class that represents the individual node of the Binary tree
+class node:
+    def __init__(self, key):
+        self.left = None
+        self.right = None
+        self.data = key
+
+
+#A function to display the leaf nodes.
+def counter(root):
+    if root:
+        if root.left == None and root.right == None:
+            print(root.data)
+        #First recur the left child
+        if root.left:
+            counter(root.left)
+        #Recur the right child at last
+        if root.right:
+            counter(root.right)
 
 
 def number_to_note(number):
@@ -29,7 +51,7 @@ def chords():
     while 1:
         index = 0
         for i in queue:
-            if play==0 or chord_arp==1:
+            if play == 0 or chord_arp == 1:
                 return
             playsound(f'chordWavs/90BPM/{i}.wav', False)
             time.sleep(speed)
@@ -65,19 +87,21 @@ def notes():
                 for _ in range(conti):
                     index = 0
                     for i in chordsToNotes[j]:
-                        if play==0 or chord_arp==0:
+                        if play == 0 or chord_arp == 0:
                             return
                         playsound(f'chordWavs/singleNotes/{i}.wav', False)
-                        player.note_on(44, 8+index)
+                        player.note_on(44, 8 + index)
                         time.sleep(speed)
-                        player.note_off(44, 8+index)
+                        player.note_off(44, 8 + index)
                         index += 1
 
-                playsound(f'chordWavs/singleNotes/{chordsToNotes[j][0]}.wav', False)
+                playsound(f'chordWavs/singleNotes/{chordsToNotes[j][0]}.wav',
+                          False)
                 player.note_on(44, 8)
                 time.sleep(speed)
                 player.note_off(44, 8)
-                playsound(f'chordWavs/singleNotes/{chordsToNotes[j][2]}.wav', False)
+                playsound(f'chordWavs/singleNotes/{chordsToNotes[j][2]}.wav',
+                          False)
                 player.note_on(44, 10)
                 time.sleep(speed)
                 player.note_off(44, 10)
@@ -91,9 +115,6 @@ def readInput():
     pygame.midi.init()
     input_device = pygame.midi.Input(0)
     while True:
-        
-        
-
 
         if input_device.poll():
             event = input_device.read(1)[0]
@@ -101,21 +122,20 @@ def readInput():
             timestamp = event[1]
             note_number = data[1]
             velocity = data[2]
-            print (number_to_note(note_number), velocity, note_number)
+            print(number_to_note(note_number), velocity, note_number)
 
             if note_number == 51:
-                play^=1
-                if play==1:
-                    if chord_arp==0:
+                play ^= 1
+                if play == 1:
+                    if chord_arp == 0:
                         Thread(target=chords).start()
                     else:
                         Thread(target=notes).start()
-                    
 
             elif note_number == 52:
                 chord_arp ^= 1
-                if play==1:
-                    if chord_arp==0:
+                if play == 1:
+                    if chord_arp == 0:
                         Thread(target=chords).start()
                     else:
                         Thread(target=notes).start()
@@ -124,10 +144,10 @@ def readInput():
             elif note_number == 54:
                 loop_1s ^= 1
             elif note_number == 55:
-                speed = 0.635-(velocity/1000)*5
+                speed = 0.635 - (velocity / 1000) * 5
                 print(speed)
             elif note_number > 55:
-                selection = note_number-55
+                selection = note_number - 55
                 if selection == 1:
                     notesQueue.append('C')
                 elif selection == 2:
@@ -144,7 +164,7 @@ def readInput():
                     notesQueue.append('B')
                 elif selection == 8:
                     try:
-                        fff=notesQueue.pop()
+                        fff = notesQueue.pop()
                     except:
                         do = 1
 
